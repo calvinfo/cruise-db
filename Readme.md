@@ -37,6 +37,9 @@
     Listening on 4002...
 
     $ cruise-db --port 4003 --join localhost:4001
+    Listening on 4003...
+
+  You can wuery keyes from the followers and they should stay in sync with any new keys posted to the leader.
 
 
 ## Caveats
