@@ -1,0 +1,53 @@
+#!/usr/bin/env node
+
+var Server = require('../');
+var program = require('commander');
+var request = require('superagent');
+
+/**
+ * Usage
+ */
+
+program
+  .version(require('../package').version)
+  .option('-p --port [port]', 'the port to listen on [4001]', parseInt, 4001)
+  .option('-h --host [host]', 'the listen hostname [127.0.0.1]', '127.0.0.1')
+  .option('-j --join [address]', 'the leader to join, e.g 127.0.0.1:4001');
+
+/**
+ * Create our app
+ */
+
+var app = new Server().app();
+
+/**
+ * Start listening
+ */
+
+var port = program.port;
+var join = program.join;
+var host = program.host;
+var client = Server.client;
+
+app.listen(port, function(){
+  console.log('listening on %d...', port);
+  if (join) join();
+});
+
+/**
+ * Joins to the leader's cruise cluster
+ */
+
+function join(){
+  request
+    .post(join + '/join')
+    .send({ host: host, port: port })
+    .end(function (err, res){
+      if (err) throw err;
+      if (!res.ok) throw new Error('failed to join: ' + res.body);
+      console.log('joined %s', join);
+    });
+}
+
+
+

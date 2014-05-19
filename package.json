@@ -1,0 +1,29 @@
+{
+  "name": "cruise-db",
+  "version": "0.0.1",
+  "description": "An example k/v store based upon cruise",
+  "keywords": [],
+  "author": "Segment.io team@segment.io",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/segmentio/cruised.git"
+  },
+  "dependencies": {
+    "commander": "^2.2.0",
+    "express": "^4.2.0",
+    "superagent": "^0.18.0",
+    "bind-all": "0.0.2",
+    "debug": "^0.8.1",
+    "body-parser": "^1.2.0",
+    "cruise": "0.0.3"
+  },
+  "devDependencies": {
+    "mocha": "^1.19.0",
+    "supertest": "^0.12.1"
+  },
+  "publishConfig": {
+    "registry": "https://segmentio.registry.nodejitsu.com"
+  },
+  "main": "lib/index",
+  "bin": "bin/cruise-db"
+}
