@@ -4,34 +4,36 @@ var Server = require('../');
 var program = require('commander');
 var request = require('superagent');
 
+
+
 /**
  * Usage
  */
 
 program
   .version(require('../package').version)
-  .option('-p --port [port]', 'the port to listen on [4001]', parseInt, 4001)
-  .option('-h --host [host]', 'the listen hostname [127.0.0.1]', '127.0.0.1')
-  .option('-j --join [address]', 'the leader to join, e.g 127.0.0.1:4001');
+  .option('-p, --port <port>', 'the port to listen on [4001]', int, 4001)
+  .option('-h, --host <host>', 'the listen hostname [127.0.0.1]', '127.0.0.1')
+  .option('-j, --join <address>', 'the leader to join, e.g 127.0.0.1:4001')
+  .parse(process.argv);
 
 /**
  * Create our app
  */
 
-var app = new Server().app();
+var server = new Server();
+var app = server.app();
 
 /**
  * Start listening
  */
 
 var port = program.port;
-var join = program.join;
 var host = program.host;
-var client = Server.client;
 
 app.listen(port, function(){
   console.log('listening on %d...', port);
-  if (join) join();
+  if (program.join) join();
 });
 
 /**
@@ -39,15 +41,26 @@ app.listen(port, function(){
  */
 
 function join(){
+  var cruise = server.cruise;
   request
-    .post(join + '/join')
-    .send({ host: host, port: port })
+    .post(program.join + '/join')
+    .send({ host: cruise.host(), port: cruise.port() })
     .end(function (err, res){
       if (err) throw err;
       if (!res.ok) throw new Error('failed to join: ' + res.body);
-      console.log('joined %s', join);
+      console.log('joined %s', program.join);
+      var body = res.body;
+      cruise.addPeer(body.host, body.port);
     });
 }
 
+/**
+ * ParseInt wrapper, since commander passes along a base value
+ *
+ * @param {String} num
+ * @return {Number}
+ */
 
-
+function int(num){
+  return parseInt(num);
+}

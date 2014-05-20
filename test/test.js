@@ -1,10 +1,13 @@
 var Server = require('../');
 var test = require('supertest');
+var assert = require('assert');
+
 
 describe('cruise-db', function(){
   var app;
+  var server;
   beforeEach(function(done){
-    var server = new Server();
+    server = new Server();
     app = server.app();
     var interval = setInterval(function(){
       if (!server.isLeader()) return;
@@ -14,8 +17,16 @@ describe('cruise-db', function(){
   });
 
   describe('/join', function(){
-    var ports = [ ];
-
+    it('should return the host and port of the cruise leader', function(done){
+      test(app)
+        .post('/join')
+        .send({ host: '127.0.0.1', port: 4030 })
+        .expect({
+          host: server.cruise.host(),
+          port: server.cruise.port()
+        })
+        .end(done);
+    });
   });
 
   describe('/put', function(){
