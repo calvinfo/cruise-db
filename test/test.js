@@ -117,20 +117,3 @@ describe('cruise-db', function(){
     }
   });
 });
-
-/**
- * Parse an address string
- *
- * @param {String} addr
- * @return {Object}
- *   @param {String} host
- *   @param {Number} port
- */
-
-function parse(addr){
-  var split = addr.split(':');
-  return {
-    host: split[0],
-    port: parseInt(split[1])
-  }
-}
