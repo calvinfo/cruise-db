@@ -18,14 +18,19 @@ describe('cruise-db', function(){
 
   describe('/join', function(){
     it('should return the host and port of the cruise leader', function(done){
+      var cruise = server.cruise;
       test(app)
         .post('/join')
         .send({ host: '127.0.0.1', port: 4030 })
         .expect({
-          host: server.cruise.host(),
-          port: server.cruise.port()
+          host: cruise.host(),
+          port: cruise.port()
         })
-        .end(done);
+        .end(function(err){
+          assert(!err);
+          assert.equal(cruise.peers().length, 2);
+          done();
+        });
     });
   });
 
@@ -56,6 +61,52 @@ describe('cruise-db', function(){
     });
   });
 
+  describe('clustering', function(){
+    before(function(done){
+      done = after(3, done);
+      var ports = [4001, 4002, 4003];
+      var servers = ports.map(function(port){
+        var server = new Server();
+        server
+          .app()
+          .listen(port);
+      });
+
+
+    });
+
+
+  });
+
   it('should replicate across servers', function(){
+    var ports =
+    var servers = ports.map(function(port){
+
+      server.app().listen(port);
+    });
+
+
+
+    function join(){
+      ports.forEach(function(){
+
+      });
+    }
+
+
+
+
   });
 });
+
+/**
+ * Run `fn` after `num` invocations
+ *
+ * No internets :'(
+ */
+
+function after(num, fn){
+  return function(){
+    if (num-- <= 0) fn.apply(fn, arguments);
+  });
+}
