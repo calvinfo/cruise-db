@@ -1,7 +1,7 @@
 var Server = require('../');
 var test = require('supertest');
 var assert = require('assert');
-
+var after = require('after');
 
 describe('cruise-db', function(){
   var app;
@@ -62,51 +62,75 @@ describe('cruise-db', function(){
   });
 
   describe('clustering', function(){
+    var servers = [];
+
     before(function(done){
+      for (var i = 0; i < 3; i++) servers.push(new Server());
+      var nodes = servers.map(function(server){ return server.cruise; });
+      nodes.forEach(function(node){
+        nodes.forEach(function(peer){
+          node.addPeer(peer.host(), peer.port());
+        });
+      });
+
+      setTimeout(done, 1000);
+    });
+
+    it('should record a key from the master', function(done){
+      var leader = findLeader();
       done = after(3, done);
-      var ports = [4001, 4002, 4003];
-      var servers = ports.map(function(port){
-        var server = new Server();
-        server
-          .app()
-          .listen(port);
-      });
+      test(leader.app())
+        .post('/db/key')
+        .send({ foo: 'bar' })
+        .expect(200)
+        .end(function(err){
+          assert(!err);
+          setTimeout(verify, 300);
+        });
 
-
+      function verify(){
+        servers.forEach(function(server){
+          test(server.app())
+            .get('/db/key')
+            .expect({ foo: 'bar' })
+            .end(done);
+        });
+      }
     });
 
+    /**
+     * Finds the leader from the group of servers
+     *
+     * @return {Server} leader
+     */
 
-  });
+    function findLeader(){
+      var leaders = servers
+        .filter(function(server){
+          return server.isLeader();
+        })
+        .sort(function(x, y){
+          return x.cruise.term() < y.cruise.term();
+        });
 
-  it('should replicate across servers', function(){
-    var ports =
-    var servers = ports.map(function(port){
-
-      server.app().listen(port);
-    });
-
-
-
-    function join(){
-      ports.forEach(function(){
-
-      });
+      return leaders[0];
     }
-
-
-
-
   });
 });
 
 /**
- * Run `fn` after `num` invocations
+ * Parse an address string
  *
- * No internets :'(
+ * @param {String} addr
+ * @return {Object}
+ *   @param {String} host
+ *   @param {Number} port
  */
 
-function after(num, fn){
-  return function(){
-    if (num-- <= 0) fn.apply(fn, arguments);
-  });
+function parse(addr){
+  var split = addr.split(':');
+  return {
+    host: split[0],
+    port: parseInt(split[1])
+  }
 }

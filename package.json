@@ -24,7 +24,8 @@
   },
   "devDependencies": {
     "mocha": "^1.19.0",
-    "supertest": "^0.12.1"
+    "supertest": "^0.12.1",
+    "after": "^0.8.1"
   },
   "main": "lib/index",
   "bin": "bin/cruise-db"
