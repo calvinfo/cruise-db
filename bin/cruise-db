@@ -4,8 +4,6 @@ var Server = require('../');
 var program = require('commander');
 var request = require('superagent');
 
-
-
 /**
  * Usage
  */
@@ -44,13 +42,13 @@ function join(){
   var cruise = server.cruise;
   request
     .post(program.join + '/join')
-    .send({ host: cruise.host(), port: cruise.port() })
+    .send({ addr: cruise.addr() })
     .end(function (err, res){
       if (err) throw err;
       if (!res.ok) throw new Error('failed to join: ' + res.body);
       console.log('joined %s', program.join);
       var body = res.body;
-      cruise.addPeer(body.host, body.port);
+      cruise.addPeer(body.addr);
     });
 }
 

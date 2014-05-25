@@ -20,7 +20,7 @@
     "bind-all": "0.0.2",
     "debug": "^0.8.1",
     "body-parser": "^1.2.0",
-    "cruise": "0.0.3"
+    "cruise": "0.0.4"
   },
   "devDependencies": {
     "mocha": "^1.19.0",
