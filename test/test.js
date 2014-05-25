@@ -10,7 +10,7 @@ describe('simple cruise-db', function(){
     server = new Server();
     app = server.app();
     var interval = setInterval(function(){
-      if (!server.isLeader()) return;
+      if (!server.cruise.isLeader()) return;
       clearInterval(interval);
       done();
     }, 100);
@@ -23,7 +23,7 @@ describe('simple cruise-db', function(){
         .post('/join')
         .send({ addr: '127.0.0.1:4030' })
         .expect({
-          addr: cruise.addr(),
+          peers: ['127.0.0.1:4030', cruise.addr()]
         })
         .end(function(err){
           assert(!err);
@@ -77,7 +77,7 @@ describe('clustering cruise-db', function(){
   });
 
   it('should record a key from the master', function(done){
-    var leader = findLeader();
+    var leader = servers[0];
     done = after(3, done);
     test(leader.app())
       .post('/db/key')
@@ -97,22 +97,4 @@ describe('clustering cruise-db', function(){
       });
     }
   });
-
-  /**
-   * Finds the leader from the group of servers
-   *
-   * @return {Server} leader
-   */
-
-  function findLeader(){
-    var leaders = servers
-      .filter(function(server){
-        return server.isLeader();
-      })
-      .sort(function(x, y){
-        return x.cruise.term() < y.cruise.term();
-      });
-
-    return leaders[0];
-  }
 });

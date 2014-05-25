@@ -13,13 +13,14 @@ program
   .option('-p, --port <port>', 'the port to listen on [4001]', int, 4001)
   .option('-h, --host <host>', 'the listen hostname [127.0.0.1]', '127.0.0.1')
   .option('-j, --join <address>', 'the leader to join, e.g 127.0.0.1:4001')
+  .option('-f, --file <file>', 'the database file', './db')
   .parse(process.argv);
 
 /**
  * Create our app
  */
 
-var server = new Server();
+var server = new Server({ db: program.file });
 var app = server.app();
 
 /**
@@ -35,7 +36,9 @@ app.listen(port, function(){
 });
 
 /**
- * Joins to the leader's cruise cluster
+ * Joins to the leader's cruise cluster. A bit more complicated
+ * than it needs to be until I get proper membership changes
+ * added to the cluster.
  */
 
 function join(){
@@ -43,12 +46,15 @@ function join(){
   request
     .post(program.join + '/join')
     .send({ addr: cruise.addr() })
-    .end(function (err, res){
+    .end(function(err, res){
       if (err) throw err;
       if (!res.ok) throw new Error('failed to join: ' + res.body);
       console.log('joined %s', program.join);
       var body = res.body;
-      cruise.addPeer(body.addr);
+      var peers = body.peers;
+      peers.forEach(function(peer){
+        cruise.peer(peer);
+      });
     });
 }
 
